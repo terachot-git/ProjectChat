@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 
 const WS_URL = process.env.NODE_ENV === 'production'
-    ? 'wss://your-backend-name.onrender.com'
+   ? 'wss://websocketapichat.onrender.com'
     : 'ws://localhost:3001';
 
 export type MessagePayload = { 

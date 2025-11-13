@@ -6,7 +6,7 @@ import { characters , Character} from '@/data/characters';
 import Image from 'next/image';
 
 const API_URL = process.env.NODE_ENV === 'production'
-    ? 'https://your-backend-name.onrender.com'
+    ? 'https://websocketapichat.onrender.com'
     : 'http://localhost:3001';
 
 interface ChatClientProps {
