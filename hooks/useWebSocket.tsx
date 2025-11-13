@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 
 const WS_URL = process.env.NODE_ENV === 'production'
-   ? 'wss://websocketapichat.onrender.com'
+    ? 'https://websocketapichat.onrender.com'
     : 'ws://localhost:3001';
 
 export type MessagePayload = { 
@@ -12,20 +12,32 @@ export type MessagePayload = {
     imageUrl?: string;
 };
 
+export type ConnectionStatus = "connecting" | "connected" | "disconnected" | "reconnecting";
+
 export function useWebSocket(roomName: string) {
     const [messages, setMessages] = useState<MessagePayload[]>([]);
-    const [isConnected, setIsConnected] = useState<boolean>(false);
+    const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("connecting");
     const socketRef = useRef<WebSocket | null>(null);
+    const retryTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    useEffect(() => {
-        if (!roomName) return;
+    const connect = () => {
+        if (retryTimeoutRef.current) {
+            clearTimeout(retryTimeoutRef.current);
+            retryTimeoutRef.current = null;
+        }
+
+        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            return;
+        }
+
+        setConnectionStatus((prev) => (prev === "disconnected" ? "reconnecting" : "connecting"));
 
         const ws = new WebSocket(WS_URL);
         socketRef.current = ws;
 
         ws.onopen = () => {
             console.log('WebSocket connected');
-            setIsConnected(true);
+            setConnectionStatus("connected");
             const joinMessage = {
                 type: 'join',
                 room: roomName
@@ -44,17 +56,32 @@ export function useWebSocket(roomName: string) {
 
         ws.onclose = () => {
             console.log('WebSocket disconnected');
-            setIsConnected(false);
+            setConnectionStatus("disconnected");
+            
+            if (!retryTimeoutRef.current) {
+                retryTimeoutRef.current = setTimeout(connect, 5000); 
+            }
         };
 
         ws.onerror = (err) => {
             console.error('WebSocket error:', err);
+            ws.close(); 
         };
+    };
+
+    useEffect(() => {
+        if (!roomName) return;
+
+        connect(); 
 
         return () => {
-            ws.close();
+            if (retryTimeoutRef.current) {
+                clearTimeout(retryTimeoutRef.current);
+            }
+            if (socketRef.current) {
+                socketRef.current.close();
+            }
         };
-
     }, [roomName]);
 
     const sendMessage = (payload: MessagePayload) => {
@@ -67,5 +94,5 @@ export function useWebSocket(roomName: string) {
         }
     };
 
-    return { messages, sendMessage, isConnected };
+    return { messages, sendMessage, connectionStatus };
 }

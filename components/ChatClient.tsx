@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useWebSocket } from '@/hooks/useWebSocket';
+import { useWebSocket, ConnectionStatus } from '@/hooks/useWebSocket';
 import { characters , Character} from '@/data/characters';
 import Image from 'next/image';
 
@@ -16,7 +16,7 @@ interface ChatClientProps {
 
 export default function ChatClient({ roomName, character }: ChatClientProps) {
     
-    const { messages, sendMessage, isConnected } = useWebSocket(roomName);
+    const { messages, sendMessage, connectionStatus } = useWebSocket(roomName);
     
     const [input, setInput] = useState<string>('');
     const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -24,6 +24,33 @@ export default function ChatClient({ roomName, character }: ChatClientProps) {
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+    const getStatusText = () => {
+         switch (connectionStatus) {
+            case "connecting":
+                return "Connecting...";
+            case "connected":
+                return "Connected";
+            case "disconnected":
+                return "Disconnected";
+            case "reconnecting":
+                return "Reconnecting...";
+        }
+    };
+
+    const getStatusColor = () => {
+         switch (connectionStatus) {
+            case "connecting":
+            case "reconnecting":
+                return "text-yellow-400";
+            case "connected":
+                return "text-green-400";
+            case "disconnected":
+                return "text-red-400";
+        }
+    };
+
+    const isInputDisabled = connectionStatus !== "connected" || isUploading;
 
     const handleSend = () => {
         if (input.trim()) {
@@ -76,9 +103,13 @@ export default function ChatClient({ roomName, character }: ChatClientProps) {
             };
             sendMessage(msgPayload);
 
-        } catch (error :any) {
+        } catch (error) {
+            let errorMessage = "Upload failed";
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
             console.error('Error uploading image:', error);
-            alert(`เกิดข้อผิดพลาด: ${error.message}`);
+            alert(`เกิดข้อผิดพลาด: ${errorMessage}`);
         } finally {
             setIsUploading(false);
             if (fileInputRef.current) {
@@ -97,29 +128,38 @@ export default function ChatClient({ roomName, character }: ChatClientProps) {
             return { avatar: sender.avatar, color: sender.color, name: sender.name };
         }
         return { 
-            avatar: 'https://api.dicebear.com/8.x/pixel-art/svg?seed=Unknown', 
+            avatar: 'https://api.dicebear.com/8.x/pixel-art/png?seed=Unknown', 
             color: 'bg-gray-500', 
             name: senderId 
         };
     };
 
     return (
-            <div className='h-screen flex items-center justify-center '>
+            <div className='min-h-screen md:p-5 flex items-center justify-center'>
             <div className="chat-wrapper">
             
-                    <div className="chat-header  flex items-center relative p-5">
-                       <Image src="/Chat-Icon-Small.webp"
-                            alt="Chat Icon"
-                            width={24}
-                            height={24}
-                            style={{
-                                width: '1.125em',
-                                height: '1.125em',
-                                filter: 'brightness(0.335)'
-                            }}
-                            className="mr-2"
-                        />
-                        <h1 className="text-xl font-bold bottom-0.5 relative">{roomName}</h1>
+                    <div className="chat-header p-5 flex items-center justify-between relative">
+                        <div className="flex items-center">
+                            <Image src="/Chat-Icon-Small.webp"
+                                alt="Chat Icon"
+                                width={24}
+                                height={24}
+                                style={{
+                                    width: '1.125em',
+                                    height: '1.125em',
+                                    filter: 'brightness(0.335)'
+                                }}
+                                className="mr-2"
+                            />
+                            <h1 className="text-xl font-bold bottom-0.5 relative">{roomName}</h1>
+                        </div>
+
+                        <div className="flex items-center">
+                            <span className={`text-sm mr-2 ${getStatusColor()}`}>
+                                {getStatusText()}
+                            </span>
+                            <Image src={character.avatar} alt={character.name} width={40} height={40} className="w-10 h-10 rounded-full bg-gray-600" />
+                        </div>
                     </div>
         
                 <div className="chat-messages">
@@ -188,9 +228,9 @@ export default function ChatClient({ roomName, character }: ChatClientProps) {
                                                 <Image 
                                                     src={fullImageUrl!}
                                                     alt="uploaded content"
-                                                    width={220}
-                                                    height={220}
-                                                    className="rounded-lg max-w-[220px] h-auto cursor-pointer"
+                                                    width={200}
+                                                    height={200}
+                                                    className="rounded-lg max-w-[200px] h-auto cursor-pointer"
                                                     unoptimized={true}
                                                     onClick={() => setSelectedImage(fullImageUrl)}
                                                 />
@@ -213,11 +253,11 @@ export default function ChatClient({ roomName, character }: ChatClientProps) {
                             accept="image/png, image/jpeg, image/gif, image/webp"
                             className="hidden"
                             id="image-upload"
-                            disabled={isUploading}
+                            disabled={isInputDisabled}
                         />
                         <label 
                             htmlFor="image-upload"
-                            className={`p-3 cursor-pointer rounded-full hover:bg-gray-700 ${isUploading ? 'opacity-50' : ''}`}
+                            className={`p-3 cursor-pointer rounded-full hover:bg-gray-700 ${isInputDisabled ? 'opacity-50' : ''}`}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
                                 <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
@@ -231,22 +271,21 @@ export default function ChatClient({ roomName, character }: ChatClientProps) {
                             value={input}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
                             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSend()}
-                            className="chat-input w-full"
-                            placeholder="พิมพ์ข้อความ..."
-                            disabled={!isConnected || isUploading}
-                            
+                            className="chat-input"
+                            placeholder={getStatusText()}
+                            disabled={isInputDisabled}
                         />
                         <button
                             onClick={handleSend}
                             className="chat-button"
-                            disabled={!isConnected || isUploading}
+                            disabled={isInputDisabled}
                         >
                             Send
                         </button>
                     </div>
             
             </div>
-            
+
             
             {selectedImage && (
                 <div 
