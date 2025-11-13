@@ -104,10 +104,10 @@ export default function ChatClient({ roomName, character }: ChatClientProps) {
     };
 
     return (
-            <div className='p-5 min-h-screen flex'>
+            <div className='h-screen flex items-center justify-center '>
             <div className="chat-wrapper">
             
-                    <div className="chat-header p-5 flex items-center relative">
+                    <div className="chat-header  flex items-center relative p-5">
                        <Image src="/Chat-Icon-Small.webp"
                             alt="Chat Icon"
                             width={24}
@@ -188,9 +188,9 @@ export default function ChatClient({ roomName, character }: ChatClientProps) {
                                                 <Image 
                                                     src={fullImageUrl!}
                                                     alt="uploaded content"
-                                                    width={250}
-                                                    height={250}
-                                                    className="rounded-lg max-w-[250px] h-auto cursor-pointer"
+                                                    width={220}
+                                                    height={220}
+                                                    className="rounded-lg max-w-[220px] h-auto cursor-pointer"
                                                     unoptimized={true}
                                                     onClick={() => setSelectedImage(fullImageUrl)}
                                                 />
@@ -231,9 +231,10 @@ export default function ChatClient({ roomName, character }: ChatClientProps) {
                             value={input}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInput(e.target.value)}
                             onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSend()}
-                            className="chat-input"
+                            className="chat-input w-full"
                             placeholder="พิมพ์ข้อความ..."
                             disabled={!isConnected || isUploading}
+                            
                         />
                         <button
                             onClick={handleSend}
@@ -245,13 +246,7 @@ export default function ChatClient({ roomName, character }: ChatClientProps) {
                     </div>
             
             </div>
-                 <div className="flex items-center absolute right-4 top-1/2 -translate-y-1/2">
-                            <span className={`text-sm mr-2 ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
-                                {isConnected ? 'Connected' : 'Connecting...'}
-                            </span>
-                            <Image src={character.avatar} alt={character.name} width={40} height={40} className="w-10 h-10 rounded-full bg-gray-600" />
-                        </div>
-
+            
             
             {selectedImage && (
                 <div 

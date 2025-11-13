@@ -6,14 +6,12 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'api.dicebear.com',
+        hostname: 'res.cloudinary.com',
         port: '',
-        pathname: '/8.x/pixel-art/png',
       },
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '3001',
+        protocol: 'https',
+        hostname: 'websocketapichat.onrender.com',
         pathname: '/uploads/**', 
       },
     ],

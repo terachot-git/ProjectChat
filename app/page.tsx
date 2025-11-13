@@ -20,7 +20,7 @@ export default function SelectionPage() {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-6">
             
-            <h1 className="text-4xl font-bold mb-8">เลือกตัวละครของคุณ</h1>
+            <h1 className="text-md md:text-4xl font-bold mb-8">เลือกตัวละครของคุณ</h1>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 {characters.map((c) => (
@@ -49,7 +49,6 @@ export default function SelectionPage() {
                 value={roomName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRoomName(e.target.value)}
                 className="w-full max-w-md px-4 py-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-center"
-                placeholder="เช่น: shadow-room"
             />
 
             <button

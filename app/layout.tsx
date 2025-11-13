@@ -8,7 +8,7 @@ const fcSound = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'My Chat App',
+  title: 'ChatZZZ',
   description: 'A simple chat application',
 };
 
