@@ -76,7 +76,7 @@ export default function ChatClient({ roomName, character }: ChatClientProps) {
             };
             sendMessage(msgPayload);
 
-        } catch (error) {
+        } catch (error :any) {
             console.error('Error uploading image:', error);
             alert(`เกิดข้อผิดพลาด: ${error.message}`);
         } finally {
