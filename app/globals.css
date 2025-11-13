@@ -29,7 +29,7 @@ body {
 }
 
 .chat-wrapper {
-  @apply flex flex-col w-full max-w-md  rounded-xl shadow-2xl mx-auto h-[calc(100vh-3rem)]
+  @apply flex flex-col w-full max-w-lg  rounded-xl shadow-2xl mx-auto h-[calc(100vh-3rem)]
   bg-gradient-to-b 
   from-black/80
   via-black/80

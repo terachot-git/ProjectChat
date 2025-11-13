@@ -6,13 +6,14 @@ const WS_URL = process.env.NODE_ENV === 'production'
     ? 'wss://your-backend-name.onrender.com'
     : 'ws://localhost:3001';
 
-interface Message { 
+export type MessagePayload = { 
     sender: string; 
-    text: string; 
+    text?: string;
+    imageUrl?: string;
 };
 
 export function useWebSocket(roomName: string) {
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<MessagePayload[]>([]);
     const [isConnected, setIsConnected] = useState<boolean>(false);
     const socketRef = useRef<WebSocket | null>(null);
 
@@ -32,9 +33,9 @@ export function useWebSocket(roomName: string) {
             ws.send(JSON.stringify(joinMessage));
         };
 
-        ws.onmessage = (event: MessageEvent) => {
+        ws.onmessage = (event) => {
             try {
-                const msg: Message = JSON.parse(event.data);
+                const msg = JSON.parse(event.data);
                 setMessages((prev) => [...prev, msg]);
             } catch (e) {
                 console.error('Failed to parse message:', e);
@@ -56,7 +57,7 @@ export function useWebSocket(roomName: string) {
 
     }, [roomName]);
 
-    const sendMessage = (payload: Message) => {
+    const sendMessage = (payload: MessagePayload) => {
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
             const fullMessage = {
                 type: 'chat',
