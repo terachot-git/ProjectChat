@@ -20,14 +20,22 @@
 }
 
 body {
-  background: var(--background);
+  background-image: url("/zzz_site_background.webp");
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
 }
 
 .chat-wrapper {
-  @apply flex flex-col w-full max-w-md h-[600px] rounded-xl shadow-2xl mx-auto min-h-screen
-  bg-gray-900 border-2 border-gray-700 
+  @apply flex flex-col w-full max-w-md  rounded-xl shadow-2xl mx-auto h-[calc(100vh-3rem)]
+  bg-gradient-to-b 
+  from-black/80
+  via-black/80
+  via-10%
+  to-gray-500/80 border-2 border-black
+  
 }
 
 .chat-header {
@@ -67,4 +75,19 @@ body {
 
 ::-webkit-scrollbar-track {
   background: transparent
+}
+.chat-message-bubble {
+  padding: 0.75rem;
+  border-radius: 0.85rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  position: relative;
+}
+
+.bubble-other {
+  @apply bg-white text-gray-900 ;
+}
+
+
+.bubble-me {
+  @apply bg-[#1c55e3] text-white;
 }
